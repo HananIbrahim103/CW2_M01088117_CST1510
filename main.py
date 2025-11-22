@@ -1,4 +1,4 @@
-from app.data.db import connect_database
+from app.data.db import connect_database, DATA_DIR
 from app.data.schema import create_users_table, create_cyber_incidents_table, create_datasets_metadata_table, create_it_tickets_table
 from app.services.user_service import register_user, login_user, migrate_users_from_file
 from app.data.incidents import insert_incident, get_all_incidents
@@ -15,13 +15,12 @@ def main():
     create_cyber_incidents_table(conn)
     create_datasets_metadata_table(conn)
     create_it_tickets_table(conn)
-    conn.close()
 
     # 2. Migrate users
-    migrate_users_from_file()
+    migrate_users_from_file(conn, filepath=DATA_DIR / "users.txt")
 
     # 3. Test authentication
-    success, msg = register_user("alice", "SecurePass123!", "analyst")
+    success, msg = register_user("alic", "SecurePass123!", "analyst")
     print(msg)
 
     success, msg = login_user("alice", "SecurePass123!")
@@ -39,7 +38,7 @@ def main():
     print(f"Created incident #{incident_id}")
 
     # 5. Query data
-    df = get_all_incidents()
+    df = get_all_incidents(conn)
     print(f"Total incidents: {len(df)}")
 
 

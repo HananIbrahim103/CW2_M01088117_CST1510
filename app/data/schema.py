@@ -10,43 +10,62 @@ def create_users_table(conn):
         )
     """)
     conn.commit()
+    print("✅ Users table created successfully!")
+    pass
 
 def create_cyber_incidents_table(conn):
     cursor = conn.cursor()
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS cyber_incidents (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            incident_type TEXT NOT NULL,
-            severity TEXT NOT NULL,
+            incident_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            date TEXT,
+            category TEXT,
+            severity TEXT,
             status TEXT DEFAULT 'open',
-            description TEXT NOT NULL,
-            reported_by TEXT NOT NULL,
-            date TEXT
+            description TEXT,
+            reported_by TEXT,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
     conn.commit()
+    print("✅ Users table created successfully!")
+    pass
 
 def create_datasets_metadata_table(conn):
     cursor = conn.cursor()
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS datasets_metadata (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            source TEXT,
+            dataset_name TEXT NOT NULL,
             catergory TEXT,
-            size INTEGER
+            source TEXT,
+            last_updated date TEXT,
+            record_count INTEGER,
+            file_size_mb REAL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
     conn.commit()
+    print("✅ Users table created successfully!")
+    pass
+
 def create_it_tickets_table(conn):
     cursor = conn.cursor()
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS it_tickets (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL,
-            priority TEXT NOT NULL,
-            status TEXT DEFAULT 'open',
-            created_date TEXT NOT NULL
+            ticket_id TEXT UNIQUE NOT NULL,
+            priority TEXT,
+            status TEXT,
+            catergory TEXT,
+            subject TEXT NOT NULL,
+            description TEXT,
+            created_date date TEXT,
+            resolved_date date TEXT,
+            assigned_to TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
     conn.commit()
+    print("✅ Users table created successfully!")
+    pass
