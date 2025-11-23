@@ -2,7 +2,9 @@ import pandas as pd
 from app.data.db import connect_database
 
 def insert_incident(date, category, severity, status, description, reported_by=None):
-    """Insert new incident."""
+    """Insert new incident.
+    :param:
+    """
     conn = connect_database()
     cursor = conn.cursor()
     cursor.execute("""
@@ -12,7 +14,7 @@ def insert_incident(date, category, severity, status, description, reported_by=N
     """, (date, category, severity, status, description, reported_by))
     conn.commit()
     incident_id = cursor.lastrowid
-    conn.close()
+    #conn.close()
     return incident_id
 
 def get_all_incidents(conn):
@@ -21,37 +23,37 @@ def get_all_incidents(conn):
         "SELECT * FROM cyber_incidents ORDER BY incident_id DESC",
         conn
     )
-    conn.close()
+    #conn.close()
     return df
 
 def update_incident_status(conn, incident_id, new_status):
     """Update incident status."""
     cursor = conn.cursor()
     cursor.execute(
-        "UPDATE cyber_incidents SET status = ? WHERE id = ?",
+        "UPDATE cyber_incidents SET status = ? WHERE incident_id = ?",
         (new_status, incident_id)
     )
     conn.commit()
-    conn.close()
+    #conn.close()
     return cursor.rowcount
 
 def delete_incident(conn, incident_id):
     """Delete incident."""
     cursor = conn.cursor()
     cursor.execute(
-        "DELETE FROM cyber_incidents WHERE id = ?",
+        "DELETE FROM cyber_incidents WHERE incident_id = ?",
         (incident_id,)
     )
     conn.commit()
-    conn.close()
+    #conn.close()
     return cursor.rowcount
 
 def get_incidents_by_type_count(conn):
     """Count incidents by type"""
     query = """
-    SELECT incident_type, COUNT(*) as count
+    SELECT category, COUNT(*) as count
     FROM cyber_incidents
-    GROUP BY incident_type
+    GROUP BY category
     ORDER BY count DESC
     """
     df = pd.read_sql_query(query, conn)
@@ -72,9 +74,9 @@ def get_high_severity_by_status(conn):
 def get_incident_types_with_many_cases(conn, min_count=5):
     """Find incident types with more than min_count cases."""
     query = """
-    SELECT incident_type, COUNT(*) as count
+    SELECT category, COUNT(*) as count
     FROM cyber_incidents
-    GROUP BY incident_type
+    GROUP BY category
     HAVING COUNT(*) > ?
     ORDER BY count DESC
     """

@@ -11,7 +11,6 @@ def create_users_table(conn):
     """)
     conn.commit()
     print("✅ Users table created successfully!")
-    pass
 
 def create_cyber_incidents_table(conn):
     cursor = conn.cursor()
@@ -28,16 +27,19 @@ def create_cyber_incidents_table(conn):
         )
     """)
     conn.commit()
-    print("✅ Users table created successfully!")
-    pass
+    print("✅ cyber_incidents table created successfully!")
 
 def create_datasets_metadata_table(conn):
     cursor = conn.cursor()
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS datasets_metadata (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            dataset_name TEXT NOT NULL,
+            dataset_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            rows INTEGER,
+            columns INTEGER,
+            uploaded_by TEXT,
             catergory TEXT,
+            upload_date date TEXT,
             source TEXT,
             last_updated date TEXT,
             record_count INTEGER,
@@ -46,8 +48,7 @@ def create_datasets_metadata_table(conn):
         )
     """)
     conn.commit()
-    print("✅ Users table created successfully!")
-    pass
+    print("✅ create_datasets_metadata table created successfully!")
 
 def create_it_tickets_table(conn):
     cursor = conn.cursor()
@@ -58,14 +59,22 @@ def create_it_tickets_table(conn):
             priority TEXT,
             status TEXT,
             catergory TEXT,
-            subject TEXT NOT NULL,
+            subject TEXT,
             description TEXT,
             created_date date TEXT,
             resolved_date date TEXT,
             assigned_to TEXT,
+            resolution_time_hours INTEGER,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
     conn.commit()
-    print("✅ Users table created successfully!")
-    pass
+    print("✅ it_tickets table created successfully!")
+
+def create_all_tables(conn):
+    create_users_table(conn)
+    create_cyber_incidents_table(conn)
+    create_datasets_metadata_table(conn)
+    create_it_tickets_table(conn)
+    print("✅ All tables created successfully!")
+    return
