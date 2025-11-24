@@ -1,3 +1,2 @@
-a,badmin,$2b$12$FKEztCbwXXJAONM1AoPKBOG74NxVdNQFnIllDRVoouF6OSXHkUkg2
-admin,$2b$12$nm/XUaEBZ7RzyfLVJqcoKeq03nQZ.Ke/cDXKWEk6/HePRc8eGkdIS
-hanan,$2b$12$By161AqfZH70Tj/8fTPMhOkHR3wjnQf3GHFUZEMYi0X9H2oGxj0rK
+hanan, gardener, $2b$12$5rAkBqLQm.HGNBdjwLcuSeo/0p0Lh5hLOL94mA7L/dbttgO4AxshG
+Smith, admin, $2b$12$T1vlrDpbUdBHkd2VuV0k7eqa3Ym/pa1qhTbXz/EFkApq5qiFIR8oC

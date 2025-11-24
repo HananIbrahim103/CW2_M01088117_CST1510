@@ -36,7 +36,7 @@ def login_user(username, password):
         return False, "Username not found."
 
     # Verify password
-    stored_hash = user[2]  # password_hash column
+    stored_hash = user[3]  # password_hash column
     if bcrypt.checkpw(password.encode('utf-8'), stored_hash.encode('utf-8')):
         return True, f"Welcome, {username}!"
     else:
@@ -59,17 +59,16 @@ def migrate_users_from_file(conn, filepath=DATA_DIR / "users.txt"):
                 continue
 
             # Parse line: username,password_hash
-            parts = line.split(',')
-            if len(parts) >= 2:
+            parts = line.split(',',2)
+            if len(parts) == 3:
                 username = parts[0]
-                password_hash = parts[1]
+                role = parts[1]
+                password_hash = parts[2]
 
                 # Insert user (ignore if already exists)
                 try:
-                    cursor.execute(
-                        "INSERT OR IGNORE INTO users (username, password_hash, role) VALUES (?, ?, ?)",
-                        (username, password_hash, 'user')
-                    )
+                    cursor.execute("INSERT OR IGNORE INTO users (username, role, password_hash) VALUES (?, ?, ?)",
+                                   (username, role, password_hash))
                     if cursor.rowcount > 0:
                         migrated_count += 1
                 except sqlite3.Error as e:

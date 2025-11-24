@@ -22,15 +22,14 @@ def main():
     migrate_users_from_file(conn, filepath=DATA_DIR / "users.txt")
 
     # 3. Test authentication
-    success, msg = register_user("alic", "SecurePass123!", "analyst")
+    success, msg = register_user("alice", "SecurePass123!", "analyst")
     print(msg)
 
     success, msg = login_user("alice", "SecurePass123!")
     print(msg)
 
     # 4. Test CRUD
-    incident_id = insert_incident("2024-11-05", "Phishing", "High", "Open", "Suspicious email detected", "test_user",
-                                  "alice")
+    incident_id = insert_incident("2024-11-05", "Phishing", "High", "Open", "Suspicious email detected", "test_user")
     print(f"Created incident #{incident_id}")
 
     # 5. Query data

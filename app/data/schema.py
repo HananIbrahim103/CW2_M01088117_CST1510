@@ -5,8 +5,8 @@ def create_users_table(conn):
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT NOT NULL UNIQUE,
-            password_hash TEXT NOT NULL,
-            role TEXT DEFAULT 'user'
+            role TEXT DEFAULT 'user',
+            password_hash TEXT NOT NULL
         )
     """)
     conn.commit()
