@@ -5,7 +5,7 @@ DATA_DIR = Path("C:/Users/Hanan/OneDrive/Documents/programming/CW2_M01088117_CST
 
 DB_PATH = DATA_DIR / "intelligence_platform.db"
 # Create DATA folder if it doesn't exist
-#Path("DATA").mkdir(parents=True, exist_ok=True)
+Path("C:/Users/Hanan/OneDrive/Documents/programming/CW2_M01088117_CST1510/DATA").mkdir(parents=False, exist_ok=True)
 
 def connect_database(db_path=DB_PATH):
     """Connect to SQLite database."""
