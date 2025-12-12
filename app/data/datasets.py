@@ -1,93 +1,118 @@
-from pathlib import Path
 import pandas as pd
-
-from app.data.db import DB_PATH
 from app.data.incidents import connect_database
-from app.data.schema import create_all_tables
-from app.services.user_service import migrate_users_from_file
 
+class Dataset:
+    """ Contains all dataset-related data.
+    This class handles retrieving datasets, and performing CRUD operations on the datasets_metadata database."""
+    def __init__(self, name, rows, columns, uploaded_by, upload_date, dataset_id:int | None = None):
+        self.dataset_id = dataset_id
+        self.name = name
+        self.rows = rows
+        self.columns = columns
+        self.uploaded_by = uploaded_by
+        self.upload_date = upload_date
 
-def load_csv_to_table(csv_path, table_name):
-    """Load csv to table."""
-    conn = connect_database()
-    if not Path(csv_path).exists():
-        print(f"❌ File not found: {csv_path}")
-        return False
+    @staticmethod
+    def get_all_datasets(conn):
+        """Get all datasets as DataFrame.
+        """
+        df = pd.read_sql_query(
+            "SELECT * FROM datasets_metadata ORDER BY dataset_id DESC",
+            conn
+        )
+        #conn.close()
+        return df
 
-    # Read CSV into DataFrame
-    df = pd.read_csv(csv_path)
+    # CRUD Operations-----------------------------------------------------------------------------------------------------
 
-    df.to_sql(table_name, con=conn, if_exists='append', index=False)
-    print(f"✅ Loaded {len(df)} rows from {csv_path} into table '{table_name}'.")
-    conn.close()
-    return len(df)
+    def insert_dataset(self) -> int:
+        """Insert new dataset into database.
+        Returns:
+            ID of the newly inserted dataset"""
+        conn = connect_database()
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO datasets_metadata 
+            (name, rows, columns, uploaded_by, upload_date)
+            VALUES (?, ?, ?, ?, ?)
+        """, (self.name, self.rows, self.columns, self.uploaded_by, self.upload_date))
+        conn.commit()
+        dataset_id = cursor.lastrowid #returns the row ID of the last inserted row (used after INSERT)
+        conn.close()
+        return dataset_id
 
-def load_all_csv_data():
-    PATH_DATA = Path("C:/Users/Hanan/OneDrive/Documents/programming/CW2_M01088117_CST1510/DATA")
+    @staticmethod
+    def update_dataset_rows_and_columns(conn, dataset_id, new_rows, new_columns) -> int:
+        """Update existing dataset status.
+        Args:
+            conn (sqlite3.Connection): Open database connection.
+            dataset_id = ID of the dataset
+            new_rows = Updated number of rows
+            new_columns = Updated number of columns
+        Returns:
+            Number of rows that have been updated"""
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+                    UPDATE datasets_metadata
+                    SET rows = ?, columns = ?
+                    WHERE dataset_id = ?
+                    """,
+            (new_rows, new_columns, dataset_id)
+        )
+        conn.commit()
+        conn.close()
+        return cursor.rowcount
 
-    csv_table_map = {
-        "cyber_incidents.csv": "cyber_incidents",
-        "datasets_metadata.csv": "datasets_metadata",
-        "it_tickets.csv": "it_tickets"
-    }
+    @staticmethod
+    def delete_dataset(conn, dataset_id: int) ->int:
+        """Delete a dataset.
+        Args:
+            conn (sqlite3.Connection): Open database connection.
+            dataset_id = ID of the row to be deleted
+        Returns:
+            Number of rows that were deleted"""
+        cursor = conn.cursor()
+        cursor.execute(
+            "DELETE FROM datasets_metadata WHERE dataset_id = ?",
+            (dataset_id,)
+        )
+        conn.commit()
+        conn.close()
+        return cursor.rowcount
 
-    for csv_file, table_name in csv_table_map.items():
-        csv_path = str(PATH_DATA / csv_file)
-        load_csv_to_table(csv_path, table_name)
+    # Analytics Queries-------------------------------------------------------------------------------------
 
+    @staticmethod
+    def get_dataset_metrics(conn):
+        """Load dataset metadata and compute summary metrics.
+        Args:
+            conn (sqlite3.Connection): Open database connection.
+        Returns:
+            A tuple containing:
+                - df (pandas.DataFrame): Full contents of ``datasets_metadata``.
+                - total_datasets (int): Number of datasets in the table.
+                - total_rows (int): Sum of the ``rows`` field across all datasets.
+                - avg_columns (float): Mean of the ``columns`` field across all datasets.
+        """
+        df = pd.read_sql_query("SELECT * FROM datasets_metadata", conn)
 
-def setup_database_complete():
-    """
-    Complete database setup:
-    1. Connect to database
-    2. Create all tables
-    3. Migrate users from users.txt
-    4. Load CSV data for all domains
-    5. Verify setup
-    """
-    print("\n" + "=" * 60)
-    print("STARTING COMPLETE DATABASE SETUP")
-    print("=" * 60)
+        total_datasets = len(df)
+        total_rows = int(df["rows"].sum())
+        avg_columns = float(df["columns"].mean())
+        return df, total_datasets, total_rows, avg_columns
 
-    # Step 1: Connect
-    print("\n[1/5] Connecting to database...")
-    conn = connect_database()
-    print("       Connected")
+    @staticmethod
+    def count_datasets_grouped_by_uploaded_by(conn):
+        """Count number of datasets uploaded by each department
+        Returns:
+            Dataframe of the query"""
+        query = """
+        SELECT uploaded_by, COUNT(*) as count
+        FROM datasets_metadata
+        GROUP BY uploaded_by
+        ORDER BY count DESC
+        """
+        df = pd.read_sql_query(query, conn)
+        return df
 
-    # Step 2: Create tables
-    print("\n[2/5] Creating database tables...")
-    create_all_tables(conn)
-
-    # Step 3: Migrate users
-    print("\n[3/5] Migrating users from users.txt...")
-    user_count = migrate_users_from_file(conn)
-    print(f"       Migrated {user_count} users")
-
-    # Step 4: Load CSV data
-    print("\n[4/5] Loading CSV data...")
-    total_rows = load_all_csv_data()
-
-    # Step 5: Verify
-    print("\n[5/5] Verifying database setup...")
-    cursor = conn.cursor()
-
-    # Count rows in each table
-    tables = ['users', 'cyber_incidents', 'datasets_metadata', 'it_tickets']
-    print("\n Database Summary:")
-    print(f"{'Table':<25} {'Row Count':<15}")
-    print("-" * 40)
-
-    for table in tables:
-        cursor.execute(f"SELECT COUNT(*) FROM {table}")
-        count = cursor.fetchone()[0]
-        print(f"{table:<25} {count:<15}")
-
-    conn.close()
-
-    print("\n" + "=" * 60)
-    print(" DATABASE SETUP COMPLETE!")
-    print("=" * 60)
-    print(f"\n Database location: {DB_PATH.resolve()}")
-
-# Run the complete setup
-setup_database_complete()

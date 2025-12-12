@@ -3,11 +3,10 @@ import bcrypt
 from pathlib import Path
 from app.data import users
 from app.data.db import connect_database, DATA_DIR
-from app.data.users import get_user_by_username, insert_user
 from app.data.schema import create_users_table, create_cyber_incidents_table, create_datasets_metadata_table, create_it_tickets_table
 
 
-def register_user(username, password, role='user'):
+'''def register_user(username, password, role='user'):
     """Register new user in the database."""
     conn = connect_database()
     cursor = conn.cursor()
@@ -31,16 +30,19 @@ def register_user(username, password, role='user'):
 
 def login_user(username, password):
     """Authenticate user against the database"""
+    # Find user
     user = get_user_by_username(username)
     if not user:
         return False, "Username not found."
 
     # Verify password
     stored_hash = user[3]  # password_hash column
+    #compares as bytes
+    #internally extracts the salt from the hash, re-hashes the plain password, and checks for a match.
     if bcrypt.checkpw(password.encode('utf-8'), stored_hash.encode('utf-8')):
         return True, f"Welcome, {username}!"
     else:
-        return False, "Invalid password."
+        return False, "Invalid password."'''
 
 def migrate_users_from_file(conn, filepath=DATA_DIR / "users.txt"):
     """Migrate users from text file to database."""

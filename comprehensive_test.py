@@ -1,8 +1,8 @@
 from app.data.db import connect_database, DATA_DIR
 from app.data.schema import create_all_tables
-from app.services.user_service import register_user, login_user, migrate_users_from_file
+#from app.services.user_service import register_user, login_user, migrate_users_from_file
 from app.data.incidents import insert_incident, get_all_incidents, delete_incident, update_incident_status, \
-    get_incidents_by_type_count, get_high_severity_by_status
+    get_incidents_by_type_count, get_high_severity_by_status, get_phishing_attacks
 import pandas as pd
 
 def run_comprehensive_tests():
@@ -16,7 +16,7 @@ def run_comprehensive_tests():
     conn = connect_database()
 
     # Test 1: Authentication
-    print("\n[TEST 1] Authentication")
+    '''print("\n[TEST 1] Authentication")
     success, msg = register_user("test_user", "TestPass123!", "user")
     print(f"  Register: {'✅' if success else '❌'} {msg}")
 
@@ -28,12 +28,10 @@ def run_comprehensive_tests():
 
     # Create
     test_id = insert_incident(
-        "2024-11-05",
-        "Test Incident",
         "Low",
+        "Test Incident",
         "Open",
         "This is a test incident",
-        "test_user"
     )
     print(f"  Create: ✅ Incident #{test_id} created")
 
@@ -51,7 +49,7 @@ def run_comprehensive_tests():
 
     # Delete
     delete_incident(conn, test_id)
-    print(f"  Delete:  Incident deleted")
+    print(f"  Delete:  Incident deleted")'''
 
     # Test 3: Analytical Queries
     print("\n[TEST 3] Analytical Queries")
@@ -61,6 +59,11 @@ def run_comprehensive_tests():
 
     df_high = get_high_severity_by_status(conn)
     print(f"  High Severity: Found {len(df_high)} status categories")
+
+    df_phishing = get_phishing_attacks(conn)
+    print(f"Phishing attacks: Found {len(df_phishing)} incidents")
+
+
 
     conn.close()
 

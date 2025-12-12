@@ -1,6 +1,6 @@
 def create_users_table(conn):
     """Create users table."""
-    cursor = conn.cursor()
+    cursor = conn.cursor() #creates a query or execution object to interact with the database
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -17,13 +17,11 @@ def create_cyber_incidents_table(conn):
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS cyber_incidents (
             incident_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            date TEXT,
-            category TEXT,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             severity TEXT,
+            category TEXT,
             status TEXT DEFAULT 'open',
-            description TEXT,
-            reported_by TEXT,
-            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            description TEXT
         )
     """)
     conn.commit()
@@ -38,13 +36,7 @@ def create_datasets_metadata_table(conn):
             rows INTEGER,
             columns INTEGER,
             uploaded_by TEXT,
-            catergory TEXT,
-            upload_date date TEXT,
-            source TEXT,
-            last_updated date TEXT,
-            record_count INTEGER,
-            file_size_mb REAL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            upload_date date TEXT
         )
     """)
     conn.commit()
@@ -54,18 +46,13 @@ def create_it_tickets_table(conn):
     cursor = conn.cursor()
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS it_tickets (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            ticket_id TEXT UNIQUE NOT NULL,
+            ticket_id INTEGER PRIMARY KEY AUTOINCREMENT,
             priority TEXT,
-            status TEXT,
-            catergory TEXT,
-            subject TEXT,
             description TEXT,
-            created_date date TEXT,
-            resolved_date date TEXT,
+            status TEXT,
             assigned_to TEXT,
-            resolution_time_hours INTEGER,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            resolution_time_hours INTEGER
         )
     """)
     conn.commit()
