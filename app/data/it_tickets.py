@@ -1,5 +1,5 @@
 import pandas as pd
-from app.data.db import connect_database
+from app.services.database_manager import DatabaseManager
 
 class Tickets:
     """ Contains all IT_ticket-related data.
@@ -12,6 +12,8 @@ class Tickets:
         self.assigned_to = assigned_to
         self.resolution_time_hours = resolution_time_hours
 
+    # CRUD Operations---------------------------------------------------------------------------------------------------
+
     @staticmethod
     def get_all_tickets(conn):
         """Get all tickets as DataFrame."""
@@ -22,13 +24,11 @@ class Tickets:
         #conn.close()
         return df
 
-    # CRUD Operations---------------------------------------------------------------------------------------------------
-
     def insert_ticket(self) -> int:
         """Insert new ticket to the database.
         Returns:
             ID of the ticket that was inserted to the database"""
-        conn = connect_database()
+        conn = DatabaseManager.get_connection()
         cursor = conn.cursor()
         cursor.execute("""
             INSERT INTO it_tickets 

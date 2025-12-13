@@ -1,5 +1,5 @@
 import pandas as pd
-from app.data.incidents import connect_database
+from app.services.database_manager import DatabaseManager
 
 class Dataset:
     """ Contains all dataset-related data.
@@ -12,6 +12,8 @@ class Dataset:
         self.uploaded_by = uploaded_by
         self.upload_date = upload_date
 
+    # CRUD Operations-----------------------------------------------------------------------------------------------------
+
     @staticmethod
     def get_all_datasets(conn):
         """Get all datasets as DataFrame.
@@ -23,13 +25,11 @@ class Dataset:
         #conn.close()
         return df
 
-    # CRUD Operations-----------------------------------------------------------------------------------------------------
-
     def insert_dataset(self) -> int:
         """Insert new dataset into database.
         Returns:
             ID of the newly inserted dataset"""
-        conn = connect_database()
+        conn = DatabaseManager.get_connection()
         cursor = conn.cursor()
         cursor.execute("""
             INSERT INTO datasets_metadata 

@@ -62,3 +62,15 @@ class Authentication:
             return user
         return None
 
+    @staticmethod
+    def validate_username(username):
+        if len(username) < 5:
+            return False, "Username must be at least 5 characters long"
+        if len(username) > 20:
+            return False, "Username must be no more than 20 characters long"
+        if not username[0].isalpha():
+            return False, "Username must start with a letter"
+        for char in username:
+            if not (char.isalnum() or char == '_'):
+                return False, "Username can only contain letters, numbers, and underscores"
+        return True, ""

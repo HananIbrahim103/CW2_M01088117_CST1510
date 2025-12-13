@@ -1,4 +1,4 @@
-from app.data.db import connect_database
+from app.services.database_manager import DatabaseManager
 import bcrypt
 
 class User:
@@ -19,12 +19,13 @@ class User:
         self.role = role
 
     def get_role(self) -> str:
+        """Retrive the role of the user."""
         return self.role
 
     @staticmethod
     def get_user_by_username(username):
         """Retrieve user from users.db by username and return a User."""
-        conn = connect_database()
+        conn = DatabaseManager.get_connection()
         cursor = conn.cursor()
         cursor.execute(
             "SELECT id, username, role, password_hash FROM users WHERE username = ?",
@@ -41,7 +42,7 @@ class User:
 
     def insert_user(self):
         """Insert new user."""
-        conn = connect_database()
+        conn = DatabaseManager.get_connection()
         cursor = conn.cursor()
         cursor.execute(
             "INSERT INTO users (username, role, password_hash) VALUES (?, ?, ?)",

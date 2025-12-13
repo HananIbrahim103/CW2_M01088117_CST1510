@@ -1,15 +1,18 @@
 import pandas as pd
-from app.data.db import connect_database
+from app.services.database_manager import DatabaseManager
+
 
 class Incident:
-    ''' Contains all incident-related data.
-    This class handles retrieving incidents, and performing CRUD operations on the cyber_indidents database.'''
+    """ Contains all incident-related data.
+    This class handles retrieving incidents, and performing CRUD operations on the cyber_indidents database."""
     def __init__(self, severity, category, status, description, incident_id:int | None = None):
         self.incident_id = incident_id
         self.severity = severity
         self.category = category
         self.status = status
         self.description = description
+
+    # CRUD Operations---------------------------------------------------------------------------------------------
 
     @staticmethod
     def get_all_incidents(conn):
@@ -20,14 +23,12 @@ class Incident:
         )
         return df
 
-    # CRUD Operations---------------------------------------------------------------------------------------------
-
     def insert_incident(self) -> int:
         """Insert new incident row
         Returns:
             ID of the inserted incident"""
 
-        conn = connect_database()
+        conn = DatabaseManager.get_connection()
         cursor = conn.cursor()
         cursor.execute("""
             INSERT INTO cyber_incidents 
@@ -63,7 +64,7 @@ class Incident:
             incident_id: ID of the incident to delete
         Returns:
             Number of rows deleted"""
-        conn = connect_database()
+        conn = DatabaseManager.get_connection()
         cursor = conn.cursor()
         cursor.execute(
             "DELETE FROM cyber_incidents WHERE incident_id = ?",
@@ -130,19 +131,6 @@ class Incident:
         WHERE severity = 'High'
         GROUP BY status
         ORDER BY count DESC
-        """
-        df = pd.read_sql_query(query, conn)
-        return df
-
-    @staticmethod
-    def get_phishing_attacks(conn):
-        """Count number oh phishing incidents
-        Returns:
-            Dataframe of the query"""
-        query = """
-        SELECT * FROM cyber_incidents
-        WHERE category = 'Phishing' 
-        ORDER BY incident_id DESC
         """
         df = pd.read_sql_query(query, conn)
         return df

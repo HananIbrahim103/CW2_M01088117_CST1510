@@ -61,7 +61,7 @@ def validate_username(username):
     for char in username:
         if not (char.isalnum() or char == '_'):
             return False, "Username can only contain letters, numbers, and underscores"
-    return True, ""
+    return True, "is valid"
 
 def validate_password(password):
     if len(password) < 6:
