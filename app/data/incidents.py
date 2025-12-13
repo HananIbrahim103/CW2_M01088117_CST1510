@@ -54,7 +54,7 @@ class Incident:
         )
         conn.commit()
         return cursor.rowcount
-        #After you run an UPDATE, DELETE, or INSERT statement: cursor.rowcount tells you how many rows were changed
+        # After you run an UPDATE, DELETE, or INSERT statement: cursor.rowcount tells you how many rows were changed
 
     @staticmethod
     def delete_incident(incident_id) -> int:

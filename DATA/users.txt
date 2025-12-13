@@ -1,2 +1,3 @@
-hanan, gardener, $2b$12$5rAkBqLQm.HGNBdjwLcuSeo/0p0Lh5hLOL94mA7L/dbttgO4AxshG
 Smith, admin, $2b$12$T1vlrDpbUdBHkd2VuV0k7eqa3Ym/pa1qhTbXz/EFkApq5qiFIR8oC
+Marcus, analyst, $2b$12$CGc0XdcnPNIt/X8f9eBH6.9ntluZMKCGhD.wlb5.PBf.WEwflmf92
+Winston, admin, $2b$12$AFiLF7X5DCrlZOA2tK.sre391Yt0vKtoZ8brM9pI6d5eRlvLzue/.
