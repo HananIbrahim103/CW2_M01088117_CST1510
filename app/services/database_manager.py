@@ -5,6 +5,7 @@ from app.data.db import DB_PATH, connect_database, DATA_DIR
 from app.data.schema import create_all_tables
 
 class DatabaseManager:
+    """Service class to Handle SQLite connections and to Manage and setup Database"""
     def __init__(self, db_path: Path | str = DB_PATH, data_dir: Path | None = None):
         self.db_path = Path(db_path)
         self.data_dir = data_dir or DATA_DIR

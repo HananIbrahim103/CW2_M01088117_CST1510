@@ -12,6 +12,9 @@ class Dataset:
         self.uploaded_by = uploaded_by
         self.upload_date = upload_date
 
+    def __str__(self) -> str:
+        return f"Dataset {self.dataset_id}: {self.name} {self.rows} {self.columns} {self.uploaded_by} {self.upload_date}"
+
     # CRUD Operations-----------------------------------------------------------------------------------------------------
 
     @staticmethod

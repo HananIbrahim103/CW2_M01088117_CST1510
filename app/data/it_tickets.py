@@ -12,6 +12,11 @@ class Tickets:
         self.assigned_to = assigned_to
         self.resolution_time_hours = resolution_time_hours
 
+    def __str__(self) -> str:
+        return (
+            f"Ticket {self.ticket_id}: {self.description} {self.priority} {self.status} {self.assigned_to} {self.resolution_time_hours}"
+        )
+
     # CRUD Operations---------------------------------------------------------------------------------------------------
 
     @staticmethod

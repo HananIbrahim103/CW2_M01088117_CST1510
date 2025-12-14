@@ -1,0 +1,6 @@
+[theme]
+base = "dark"
+backgroundColor = "#001f3f"          # navy blue
+secondaryBackgroundColor = "#012a4a" # cards/sidebar etc.
+textColor = "#FFFFFF"
+primaryColor = "#1E90FF"             # accent (buttons, sliders)

@@ -12,6 +12,9 @@ class Incident:
         self.status = status
         self.description = description
 
+    def __str__(self) -> str:
+        return f"Incident {self.incident_id} {self.severity} {self.category} {self.status} {self.description}"
+
     # CRUD Operations---------------------------------------------------------------------------------------------
 
     @staticmethod

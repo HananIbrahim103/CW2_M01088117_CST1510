@@ -1,22 +1,15 @@
 import bcrypt
 from app.data.users import User
+from app.services.database_manager import DatabaseManager
+
 
 class Authentication:
     """
-    Core User entity.
-
-    Attributes:
-        username: str
-        password_hash: str
-        role: str
-        id: int
+    Service class. Handles User login and Registration
     """
     # A special method that initializes a new object's state
-    def __init__(self, username: str, password_hash: str, role: str="user", id: int | None = None):
-        self.id = id
-        self.username = username
-        self.password_hash = password_hash
-        self.role = role
+    def __init__(self, db: DatabaseManager):
+        self.db = db
 
     @staticmethod # makes a method belong to the class without getting self, so it can be called on the class without needing an instance.
     def hash_password(password: str):
@@ -40,10 +33,23 @@ class Authentication:
 
     @staticmethod
     def validate_password(password: str):
+        """Validates Password strength"""
         if len(password) < 6:
             return False, "Password must be at least 6 characters long."
         if len(password) > 20:
             return False, "Password must be no more than 20 characters long."
+
+        has_upper = any(i.isupper() for i in password)
+        has_lower = any(i.islower() for i in password)
+        has_digit = any(i.isdigit() for i in password)
+
+        if not has_upper:
+            return (False, "Password must contain at least one uppercase letter.")
+        if not has_lower:
+            return (False, "Password must contain at least one lowercase letter.")
+        if not has_digit:
+            return (False, "Password must contain at least one digit.")
+
         return True, "OK"
 
     @staticmethod
@@ -58,12 +64,14 @@ class Authentication:
     def authenticate(username: str, raw_password: str):
         """Return User if credentials are correct, else None."""
         user = User.get_user_by_username(username)
+        print(type(user), vars(user) if user else None)
         if user and Authentication.verify_password(raw_password, user.password_hash):
             return user
         return None
 
     @staticmethod
     def validate_username(username):
+        """Validate a username"""
         if len(username) < 5:
             return False, "Username must be at least 5 characters long"
         if len(username) > 20:
@@ -74,3 +82,4 @@ class Authentication:
             if not (char.isalnum() or char == '_'):
                 return False, "Username can only contain letters, numbers, and underscores"
         return True, ""
+
