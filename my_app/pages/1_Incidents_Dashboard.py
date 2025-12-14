@@ -46,12 +46,13 @@ with incident_tab:
         submitted = st.form_submit_button("Add Incident")
 
     # When form is submitted
-    if submitted and description:
-        Incident(severity=severity, category=category, status=status, description=description).insert_incident()
-        st.success("✓ Incident added successfully!")
-        st.rerun()  # Refresh the page to show new incident
-    else:
-        st.error("You must fill in all the fields")
+    if submitted:
+        if description:
+            Incident(severity=severity, category=category, status=status, description=description).insert_incident()
+            st.success("✓ Incident added successfully!")
+            st.rerun()  # Refresh the page to show new incident
+        else:
+            st.error("You must fill in all the fields")
 
     # Update form
     with st.form("update_status"):
@@ -60,11 +61,12 @@ with incident_tab:
         update = st.form_submit_button("Update")
 
     # When the form is submitted
-    if incident_id and update:
-        Incident.update_incident_status(conn, incident_id, new_status)
-        st.rerun()
-    else:
-        st.error("You must select an Incident ID.")
+    if update:
+        if incident_id:
+            Incident.update_incident_status(conn, incident_id, new_status)
+            st.rerun()
+        else:
+            st.error("You must select an Incident ID.")
 
     # Delete Incident
     incident_ids = [str(inc["incident_id"]) for _, inc in incidents.iterrows()]

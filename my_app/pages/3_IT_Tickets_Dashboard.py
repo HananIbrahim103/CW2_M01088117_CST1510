@@ -45,13 +45,14 @@ with tickets_tab:
         submitted = st.form_submit_button("Add Ticket")
 
     # When form is submitted
-    if submitted and priority and description and status and assigned_to and resolution_time_hours:
-        # Call Week 8 function to insert into database
-        Tickets(priority=priority, description=description, status=status, assigned_to=assigned_to, resolution_time_hours=resolution_time_hours).insert_ticket()
-        st.success("✓ Ticket added successfully!")
-        st.rerun()  # Refresh the page to show new ticket
-    else:
-        st.error("You must fill in all the fields")
+    if submitted:
+        if priority and description and status and assigned_to and resolution_time_hours:
+            # Call Week 8 function to insert into database
+            Tickets(priority=priority, description=description, status=status, assigned_to=assigned_to, resolution_time_hours=resolution_time_hours).insert_ticket()
+            st.success("✓ Ticket added successfully!")
+            st.rerun()  # Refresh the page to show new ticket
+        else:
+            st.error("You must fill in all the fields")
 
     # Update form
     with st.form("update_ticket"):
@@ -59,11 +60,12 @@ with tickets_tab:
         new_status = st.selectbox("Status", ["Open", "In Progress", "Resolved", "Waiting for user"])
         update = st.form_submit_button("Update")
 
-    if ticket_id and update:
-        Tickets.update_ticket_status(conn, ticket_id, new_status)
-        st.rerun()
-    else:
-        st.error("You must fill in all the fields.")
+    if update:
+        if ticket_id:
+            Tickets.update_ticket_status(conn, ticket_id, new_status)
+            st.rerun()
+        else:
+            st.error("You must fill in all the fields.")
 
     ticket_ids = [str(inc["ticket_id"]) for _, inc in tickets.iterrows()]
     selected_id = st.selectbox("Select incident to delete", ticket_ids)
@@ -106,25 +108,22 @@ with analytics_tab:
 with AI_tab:
     #	Initialize	OpenAI	client
     api_key = st.text_input("Your OpenAI API key", type="password")
+    # Get user input
+    prompt = st.chat_input("Say	something...")
 
     if api_key:
         # Create OpenAI client from the key STRING
         client = OpenAI(api_key=api_key)
 
-        # Page configuration
-        st.set_page_config(
-            page_title="ChatGPT	Assistant",
-            page_icon="💬",
-            layout="wide"
-        )
-
         #	Page	title
         st.title("🛡 IT Operations AI	Assistant")
         st.caption("Powered by GPT-5-nano")
 
+        TICKETS_KEY = "tickets_messages"
+
         #	Initialize	session	state	for	messages
-        if 'messages' not in st.session_state:
-            st.session_state.messages = [
+        if TICKETS_KEY not in st.session_state:
+            st.session_state[TICKETS_KEY] = [
                 {
                     "role": "system",
                     "content": """You are an IT operations expert. 
@@ -134,28 +133,26 @@ with AI_tab:
                     Format: Clear, structured responses"""
                 }
             ]
-
+        messages  = st.session_state[TICKETS_KEY]
         # Sidebar with controls
         with st.sidebar:
             st.subheader("Chat controls")
 
             #	Display	message	count
-            message_count = len([m for m in st.session_state.messages if m["role"] != "system"])
+            message_count = len([m for m in messages if m["role"] != "system"])
             st.metric("Messages", message_count)
 
             # Clear chat button
             if st.button("🗑 Clear	Chat", use_container_width=True):
-                st.session_state.messages = []
+                st.session_state[TICKETS_KEY] = []
                 st.rerun()
 
         # Display all previous messages
-        for message in st.session_state.messages:
+        for message in messages:
             if message["role"] != "system":  # Don't display system prompt
                 with st.chat_message(message["role"]):
                     st.markdown(message["content"])
 
-        # Get user input
-        prompt = st.chat_input("Say	something...")
 
         if prompt:
             #	Display	user	message
@@ -163,7 +160,7 @@ with AI_tab:
                 st.markdown(prompt)
 
             # Add user message to session state
-            st.session_state.messages.append({
+            messages.append({
                 "role": "user",
                 "content": prompt
             })
@@ -172,7 +169,7 @@ with AI_tab:
             with st.spinner("Thinking..."):
                 completion = client.chat.completions.create(
                     model="gpt-5-nano",
-                    messages=st.session_state.messages,
+                    messages=messages,
                     stream=True  # Enable streaming (response appears word by word)
                     # Returns a generator instead of complete response
                 )
@@ -193,7 +190,7 @@ with AI_tab:
                     container.markdown(full_reply)
 
             # save complete response to session state
-            st.session_state.messages.append({
+            messages.append({
                 "role": "assistant",
                 "content": full_reply
             })

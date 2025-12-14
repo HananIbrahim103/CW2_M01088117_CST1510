@@ -14,8 +14,8 @@ st.set_page_config(
 # Show basic profile info
 st.title("⚙️ Settings")
 
-st.subheader("🧑 My profile")
-st.write(f"Username: **{st.session_state.username}**")
+st.subheader("🧑🏻‍💼 My profile:")
+st.write(f"\nUsername: **{st.session_state.username}**")
 st.write(f"Role: **{st.session_state.role}**")  # if you store role
 
 st.markdown("----")
@@ -37,7 +37,7 @@ if st.button("Change password", type="primary"):
         else:
             # Verify current password against DB
             user = User.get_user_by_username(st.session_state.username)
-            if not user or not user.verify_password(current_pw):
+            if not user or not Authentication.verify_password(current_pw, user.password_hash):
                 st.error("Current password is incorrect.")
             else:
                 # Update password in the DB

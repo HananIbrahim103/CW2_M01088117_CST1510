@@ -77,15 +77,19 @@ with tab_register:
          elif new_password != confirm_password:
              st.error("Passwords do not match.")
          else:
-             ok, msg = Authentication.validate_password(new_password)
-             if not ok:
-                 st.error(msg)
+             username_valid, username_msg = Authentication.validate_username(new_username)
+             if not username_valid:
+                 st.error(username_msg)
              else:
-                 existing = User.get_user_by_username(new_username)
-                 if existing: #not none
-                     st.error("Username already exists. Choose another username.")
+                 ok, msg = Authentication.validate_password(new_password)
+                 if not ok:
+                     st.error(msg)
                  else:
-                     user = Authentication.register(username=new_username,
-                                          raw_password=new_password,
-                                          role=new_role)
-                     st.success("Account created! You can now log in.")
+                     existing = User.get_user_by_username(new_username)
+                     if existing: #not none
+                         st.error("Username already exists. Choose another username.")
+                     else:
+                         user = Authentication.register(username=new_username,
+                                              raw_password=new_password,
+                                              role=new_role)
+                         st.success("Account created! You can now log in.")

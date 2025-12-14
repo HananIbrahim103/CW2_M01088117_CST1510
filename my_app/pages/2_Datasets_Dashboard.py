@@ -50,13 +50,14 @@ with dataset_tab:
         submitted = st.form_submit_button("Add Dataset")
 
     # When form is submitted
-    if submitted and name and rows and columns and uploaded_by and upload_date:
-        # Call Week 8 function to insert into database
-        Dataset(name=name, rows=rows, columns=columns, uploaded_by=uploaded_by, upload_date=upload_date).insert_dataset()
-        st.success("✓ Dataset added successfully!")
-        st.rerun()  # Refresh the page to show new dataset
-    else:
-        st.error("You must fill in all the fields")
+    if submitted:
+        if name and rows and columns and uploaded_by and upload_date:
+            # Call Week 8 function to insert into database
+            Dataset(name=name, rows=rows, columns=columns, uploaded_by=uploaded_by, upload_date=upload_date).insert_dataset()
+            st.success("✓ Dataset added successfully!")
+            st.rerun()  # Refresh the page to show new dataset
+        else:
+            st.error("You must fill in all the fields")
 
     # Update form
     with st.form("Update rows and columns"):
@@ -65,11 +66,12 @@ with dataset_tab:
         new_columns = st.text_input("Columns")
         update = st.form_submit_button("Update")
 
-    if dataset_id and update and new_rows:
-        Dataset.update_dataset_rows_and_columns(conn, dataset_id, new_rows, new_columns)
-        st.rerun()
-    else:
-        st.error("You must fill in all fields.")
+    if update:
+        if dataset_id and new_rows:
+            Dataset.update_dataset_rows_and_columns(conn, dataset_id, new_rows, new_columns)
+            st.rerun()
+        else:
+            st.error("You must fill in all fields.")
 
     dataset_ids = [str(inc["dataset_id"]) for _, inc in datasets.iterrows()]
     selected_id = st.selectbox("Select dataset to delete", dataset_ids)
@@ -119,25 +121,23 @@ with analytics_tab:
 with AI_tab:
     #	Initialize	OpenAI	client
     api_key = st.text_input("Your OpenAI API key", type="password")
+    # Get user input
+    prompt = st.chat_input("Enter your message here...")
 
     if api_key:
         # Create OpenAI client from the key STRING
         client = OpenAI(api_key=api_key)
 
-        # Page configuration
-        st.set_page_config(
-            page_title="ChatGPT	Assistant",
-            page_icon="💬",
-            layout="wide"
-        )
-
-        #	Page	title
+        # Page title
         st.title("🛡 Datascience AI	Assistant")
         st.caption("Powered by GPT-5-nano")
 
+        # Initialize session state for messages
+        DATASET_KEY = "dataset_key"
+
         #	Initialize	session	state	for	messages
-        if 'messages' not in st.session_state:
-            st.session_state.messages = [
+        if DATASET_KEY not in st.session_state:
+            st.session_state[DATASET_KEY]= [
                 {
                     "role": "system",
                     "content": """You are a data science expert. 
@@ -147,45 +147,27 @@ with AI_tab:
                     Format: Clear, structured responses"""
                 }
             ]
+        messages = st.session_state[DATASET_KEY]
 
         # Sidebar with controls
         with st.sidebar:
             st.subheader("Chat controls")
 
             #	Display	message	count
-            message_count = len([m for m in st.session_state.messages if m["role"] != "system"])
+            message_count = len([m for m in messages if m["role"] != "system"])
             st.metric("Messages", message_count)
 
             # Clear chat button
             if st.button("🗑 Clear	Chat", use_container_width=True):
-                st.session_state.messages = []
+                st.session_state[DATASET_KEY] = []
                 st.rerun()
 
-            # Model selection
-            model = st.selectbox(
-                "Model",
-                ["gpt-4o", "gpt-5-nano"],
-                index=0
-            )
-
-            # Temperature slider
-            temperature = st.slider(
-                "Temperature",
-                min_value=0.0,
-                max_value=2.0,
-                value=1.0,
-                step=0.1,
-                help="Higher values make output more random"
-            )
 
         # Display all previous messages
-        for message in st.session_state.messages:
+        for message in messages:
             if message["role"] != "system":  # Don't display system prompt
                 with st.chat_message(message["role"]):
                     st.markdown(message["content"])
-
-        # Get user input
-        prompt = st.chat_input("Say	something...")
 
         if prompt:
             #	Display	user	message
@@ -193,7 +175,7 @@ with AI_tab:
                 st.markdown(prompt)
 
             # Add user message to session state
-            st.session_state.messages.append({
+            messages.append({
                 "role": "user",
                 "content": prompt
             })
@@ -202,8 +184,7 @@ with AI_tab:
             with st.spinner("Thinking..."):
                 completion = client.chat.completions.create(
                     model="gpt-5-nano",
-                    messages=st.session_state.messages,
-                    temperature=temperature,
+                    messages=messages,
                     stream=True  # Enable streaming (response appears word by word)
                     # Returns a generator instead of complete response
                 )
@@ -224,7 +205,7 @@ with AI_tab:
                     container.markdown(full_reply)
 
             # save complete response to session state
-            st.session_state.messages.append({
+            messages.append({
                 "role": "assistant",
                 "content": full_reply
             })
